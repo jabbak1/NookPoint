@@ -11,14 +11,26 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Cache signing key (so updates install over old versions)
+      - name: Cache signing key
         uses: actions/cache@v4
         with:
           path: ~/.nookpoint.jks
           key: nookpoint-keystore-v1
       - name: Build
-        run: bash build.sh
+        run: |
+          if [ -z "$(find . -name build.sh -not -path './.git/*' | head -n1)" ]; then
+            for z in $(find . -name '*.zip' -not -path './.git/*'); do unzip -o "$z" -d unz; done
+          fi
+          S=$(find . -name build.sh -not -path './.git/*' | head -n1)
+          if [ -z "$S" ]; then
+            echo "build.sh not found. Files in repo:"
+            find . -not -path './.git/*' | head -50
+            exit 1
+          fi
+          cd "$(dirname "$S")"
+          bash build.sh
+          echo "APK_DIR=$(pwd)/build" >> "$GITHUB_ENV"
       - uses: actions/upload-artifact@v4
         with:
           name: NookPoint-apk
-          path: build/NookPoint.apk
+          path: ${{ env.APK_DIR }}/NookPoint.apk
