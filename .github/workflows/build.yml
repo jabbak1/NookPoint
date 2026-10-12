@@ -1,0 +1,24 @@
+name: Build APK
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Cache signing key (so updates install over old versions)
+        uses: actions/cache@v4
+        with:
+          path: ~/.nookpoint.jks
+          key: nookpoint-keystore-v1
+      - name: Build
+        run: bash build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NookPoint-apk
+          path: build/NookPoint.apk
