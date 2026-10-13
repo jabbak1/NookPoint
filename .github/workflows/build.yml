@@ -67,7 +67,7 @@ jobs:
           rm -rf build; mkdir -p build/classes build/dex
 
           echo "== javac ($(echo "$JAVA_FILES" | wc -l) files)"
-          javac -source 8 -target 8 -bootclasspath "$JAR" -encoding UTF-8 -Xlint:-options -nowarn -d build/classes $JAVA_FILES
+          mapfile -t ARR <<< "$JAVA_FILES"; javac -source 8 -target 8 -bootclasspath "$JAR" -encoding UTF-8 -Xlint:-options -nowarn -d build/classes "${ARR[@]}"
 
           echo "== d8 (min API 7)"
           "$BT/d8" --release --min-api 7 --lib "$JAR" --output build/dex $(find build/classes -name '*.class')
