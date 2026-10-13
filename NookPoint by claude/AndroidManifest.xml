@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.nookpoint.reader"
+    android:versionCode="5"
+    android:versionName="0.5">
+
+    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="7" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:label="NookPoint"
+        android:icon="@drawable/icon"
+        android:theme="@android:style/Theme.Light.NoTitleBar">
+
+        <activity android:name=".HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ReaderActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" android:mimeType="application/epub+zip" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".BrowserActivity" />
+        <activity android:name=".TocActivity" />
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".TransferActivity" />
+        <activity android:name=".KeyTestActivity" />
+        <activity android:name=".StatsActivity" />
+        <activity android:name=".BookmarksActivity" />
+    </application>
+</manifest>
