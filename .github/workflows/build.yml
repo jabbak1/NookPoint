@@ -21,17 +21,19 @@ jobs:
           bash <<'NOOKBUILD'
           set -euo pipefail
           REPO="$(pwd)"
+
           # --- unpack a zip that was uploaded as-is
-          if [ -z "$(find "$REPO" -name AndroidManifest.xml -not -path '*/.git/*' | head -n1)" ]; then
-            for z in $(find "$REPO" -name '*.zip' -not -path '*/.git/*'); do unzip -o -q "$z" -d "$REPO/unz"; done
+          if [ -z "$(find "$REPO" -name AndroidManifest.xml -not -path '*/.git/*' -print -quit)" ]; then
+            while IFS= read -r -d '' z; do unzip -o -q "$z" -d "$REPO/unz"; done < <(find "$REPO" -name '*.zip' -not -path '*/.git/*' -print0)
           fi
-          # --- locate the project root (prefer the copy that contains the newest sources)
+
+          # --- locate the project root (folder names may contain spaces)
           ROOT=""
-          for m in $(find "$REPO" -name AndroidManifest.xml -not -path '*/build/*' -not -path '*/.git/*'); do
+          while IFS= read -r -d '' m; do
             d="$(dirname "$m")"
             [ -n "$ROOT" ] || ROOT="$d"
             if [ -n "$(find "$d" -name T.java -print -quit)" ]; then ROOT="$d"; break; fi
-          done
+          done < <(find "$REPO" -name AndroidManifest.xml -not -path '*/build/*' -not -path '*/.git/*' -print0)
           if [ -z "$ROOT" ]; then
             echo "AndroidManifest.xml not found. Repository contents:"
             find "$REPO" -not -path '*/.git/*' | head -100
@@ -39,13 +41,18 @@ jobs:
           fi
           cd "$ROOT"
           echo "project root: $ROOT"
-          # --- Java files
-          mapfile -d '' JAVA_FILES < <(find . -name '*.java' -not -path './build/*' -print0)
+          [ -f AndroidManifest.xml ] || { echo "AndroidManifest.xml is not in $ROOT"; exit 1; }
+
+          # --- Java files (prefer the src folder)
+          SRC_DIR="."; [ -d src ] && SRC_DIR="src"
+          JAVA_FILES=()
+          while IFS= read -r -d '' f; do JAVA_FILES+=("$f"); done < <(find "$SRC_DIR" -name '*.java' -not -path './build/*' -print0)
           if [ "${#JAVA_FILES[@]}" -eq 0 ]; then
-            echo "No .java files found next to AndroidManifest.xml. Contents:"
+            echo "No .java files found in $ROOT. Contents:"
             find . -not -path './.git/*' | head -100
             exit 1
           fi
+
           # --- Android SDK tools
           SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
           [ -d "$SDK" ] || { echo "Android SDK not found at $SDK"; exit 1; }
@@ -60,58 +67,41 @@ jobs:
             if [ -f "${d}android.jar" ]; then JAR="${d}android.jar"; break; fi
           done
           [ -n "$JAR" ] || { echo "No android.jar"; exit 1; }
-          echo "build-tools: $BT"
-          echo "android.jar: $JAR"
-          rm -rf build
-          mkdir -p build/classes build/dex
+          echo "build-tools: $BT"; echo "android.jar: $JAR"
+
+          rm -rf build; mkdir -p build/classes build/dex
+
           echo "== javac (${#JAVA_FILES[@]} files)"
-          javac -source 8 -target 8 \
-            -bootclasspath "$JAR" \
-            -encoding UTF-8 \
-            -Xlint:-options \
-            -nowarn \
-            -d build/classes \
-            "${JAVA_FILES[@]}"
+          javac -source 8 -target 8 -bootclasspath "$JAR" -encoding UTF-8 -Xlint:-options -nowarn -d build/classes "${JAVA_FILES[@]}"
+
           echo "== d8 (min API 7)"
-          "$BT/d8" --release --min-api 7 --lib "$JAR" --output build/dex $(find build/classes -name '*.class')
+          CLASSES=()
+          while IFS= read -r -d '' f; do CLASSES+=("$f"); done < <(find build/classes -name '*.class' -print0)
+          "$BT/d8" --release --min-api 7 --lib "$JAR" --output build/dex "${CLASSES[@]}"
+
           echo "== resources"
-          RES=""
-          [ -d res ] && RES="-S res"
-          AST=""
-          [ -d assets ] && AST="-A assets"
+          RES=(); [ -d res ] && RES=(-S res)
+          AST=(); [ -d assets ] && AST=(-A assets)
           if [ -x "$BT/aapt" ]; then
-            "$BT/aapt" package -f -0 ttf -M AndroidManifest.xml $RES $AST -I "$JAR" -F build/app.unaligned
+            "$BT/aapt" package -f -0 ttf -M AndroidManifest.xml "${RES[@]}" "${AST[@]}" -I "$JAR" -F build/app.unaligned
           else
             "$BT/aapt2" compile --dir res -o build/res.zip
             "$BT/aapt2" link -o build/app.unaligned -I "$JAR" --manifest AndroidManifest.xml \
-              --min-sdk-version 7 --target-sdk-version 7 $AST -0 .ttf build/res.zip
+              --min-sdk-version 7 --target-sdk-version 7 "${AST[@]}" -0 .ttf build/res.zip
           fi
           (cd build/dex && zip -q -j ../app.unaligned classes.dex)
+
           echo "== align + sign"
           "$BT/zipalign" -f 4 build/app.unaligned build/app.aligned
           KS="${KS:-$HOME/.nookpoint.jks}"
           if [ ! -f "$KS" ]; then
-            keytool -genkeypair \
-              -keystore "$KS" \
-              -storepass nookpoint \
-              -keypass nookpoint \
-              -alias nook \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 8000 \
-              -dname "CN=NookPoint"
+            keytool -genkeypair -keystore "$KS" -storepass nookpoint -keypass nookpoint -alias nook \
+              -keyalg RSA -keysize 2048 -validity 8000 -dname "CN=NookPoint"
           fi
-          "$BT/apksigner" sign \
-            --ks "$KS" \
-            --ks-pass pass:nookpoint \
-            --key-pass pass:nookpoint \
-            --ks-key-alias nook \
-            --min-sdk-version 7 \
-            --v1-signing-enabled true \
-            --v2-signing-enabled false \
-            --v3-signing-enabled false \
-            --out build/NookPoint.apk \
-            build/app.aligned
+          "$BT/apksigner" sign --ks "$KS" --ks-pass pass:nookpoint --key-pass pass:nookpoint \
+            --ks-key-alias nook --min-sdk-version 7 \
+            --v1-signing-enabled true --v2-signing-enabled false --v3-signing-enabled false \
+            --out build/NookPoint.apk build/app.aligned
           echo "Done: $(pwd)/build/NookPoint.apk"
           [ -z "${GITHUB_ENV:-}" ] || echo "APK=$(pwd)/build/NookPoint.apk" >> "$GITHUB_ENV"
           NOOKBUILD
