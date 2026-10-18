@@ -2,6 +2,13 @@ name: Build APK
 on:
   push:
   workflow_dispatch:
+    inputs:
+      show_key:
+        description: "Print the signing key (base64) in the run summary, to save it as the KEYSTORE_B64 secret"
+        type: boolean
+        default: false
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,7 +23,17 @@ jobs:
         with:
           path: ~/.nookpoint.jks
           key: nookpoint-keystore-v1
+      - name: Use the permanent signing key from secrets (if present)
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$HOME/.nookpoint.jks"
+            echo "Using the signing key from the KEYSTORE_B64 secret"
+          fi
       - name: Build
+        env:
+          KS_PASS: ${{ secrets.KEYSTORE_PASS }}
         run: |
           bash <<'NOOKBUILD'
           set -euo pipefail
@@ -94,18 +111,41 @@ jobs:
           echo "== align + sign"
           "$BT/zipalign" -f 4 build/app.unaligned build/app.aligned
           KS="${KS:-$HOME/.nookpoint.jks}"
+          KS_PASS="${KS_PASS:-nookpoint}"
           if [ ! -f "$KS" ]; then
-            keytool -genkeypair -keystore "$KS" -storepass nookpoint -keypass nookpoint -alias nook \
+            keytool -genkeypair -keystore "$KS" -storepass "$KS_PASS" -keypass "$KS_PASS" -alias nook \
               -keyalg RSA -keysize 2048 -validity 8000 -dname "CN=NookPoint"
           fi
-          "$BT/apksigner" sign --ks "$KS" --ks-pass pass:nookpoint --key-pass pass:nookpoint \
+          "$BT/apksigner" sign --ks "$KS" --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" \
             --ks-key-alias nook --min-sdk-version 7 \
             --v1-signing-enabled true --v2-signing-enabled false --v3-signing-enabled false \
             --out build/NookPoint.apk build/app.aligned
           echo "Done: $(pwd)/build/NookPoint.apk"
-          [ -z "${GITHUB_ENV:-}" ] || echo "APK=$(pwd)/build/NookPoint.apk" >> "$GITHUB_ENV"
+          VERSION_NAME="$(grep -o 'versionName="[^"]*"' AndroidManifest.xml | head -n1 | cut -d'"' -f2)"
+          if [ -n "${GITHUB_ENV:-}" ]; then
+            echo "APK=$(pwd)/build/NookPoint.apk" >> "$GITHUB_ENV"
+            echo "VERSION=${VERSION_NAME:-0}" >> "$GITHUB_ENV"
+          fi
           NOOKBUILD
+      - name: Show signing key (only when asked)
+        if: ${{ github.event.inputs.show_key == 'true' }}
+        run: |
+          {
+            echo "### Signing key"
+            echo "Save this text as the repository secret KEYSTORE_B64 (Settings > Secrets and variables > Actions)."
+            echo "If you did not set KEYSTORE_PASS, the key password is: nookpoint (leave KEYSTORE_PASS unset)."
+            echo '```'
+            base64 -w0 "$HOME/.nookpoint.jks"
+            echo
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
           name: NookPoint-apk
           path: ${{ env.APK }}
+      - name: Publish a release with the APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}-b${{ github.run_number }}
+          name: NookPoint ${{ env.VERSION }} (build ${{ github.run_number }})
+          files: ${{ env.APK }}
