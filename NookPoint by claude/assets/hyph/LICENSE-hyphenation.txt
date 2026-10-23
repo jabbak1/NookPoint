@@ -1,6 +1,0 @@
-Hyphenation dictionaries (assets/hyph/*.hyb)
-
-These files are compact binary versions (the format used by Android and Chromium) of the pattern sets of the
-TeX "hyph-utf8" project: https://github.com/hyphenation/tex-hyphen
-Each language's patterns are distributed under the license chosen by their authors (for example MIT, LGPL or
-the TeX/LPPL licenses); see the hyph-utf8 repository for the authors and license of every language.
