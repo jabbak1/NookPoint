@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -24,8 +25,31 @@ public class HomeActivity extends Activity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         Prefs.init(this);
+        if (CrashGuard.isLoop()) {                       // a launcher that keeps crashing must not lock the device
+            LauncherHelper.stopBeingHome(this);
+            CrashGuard.clear();
+            Toast.makeText(this, T.t("NookPoint stopped being the home screen after repeated crashes. Press Home to choose another launcher."), Toast.LENGTH_LONG).show();
+            dead = true;
+            finish();
+            return;
+        }
         Prefs.booksDir();
         Backup.auto();
+    }
+
+    private boolean dead;
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
+
+    /** As the home screen there is nowhere to go back to. */
+    @Override
+    public void onBackPressed() {
+        if (getIntent() != null && getIntent().hasCategory(Intent.CATEGORY_HOME)) return;
+        super.onBackPressed();
     }
 
     private void build() {
@@ -43,13 +67,21 @@ public class HomeActivity extends Activity {
 
         root.addView(Ui.rule(this, 2));
         LinearLayout nav = new LinearLayout(this);
-        nav.setOrientation(LinearLayout.HORIZONTAL);
+        nav.setOrientation(LinearLayout.VERTICAL);
         nav.setPadding(6, 8, 6, 8);
-        nav.addView(navButton(T.t("Library"), BrowserActivity.class), navLp());
-        nav.addView(navButton(T.t("Stats"), StatsActivity.class), navLp());
-        nav.addView(navButton(T.t("Wi-Fi"), TransferActivity.class), navLp());
-        nav.addView(navButton(T.t("Online"), OpdsActivity.class), navLp());
-        nav.addView(navButton(T.t("Settings"), SettingsActivity.class), navLp());
+        LinearLayout r1 = new LinearLayout(this), r2 = new LinearLayout(this);
+        r1.setOrientation(LinearLayout.HORIZONTAL);
+        r2.setOrientation(LinearLayout.HORIZONTAL);
+        r1.addView(navButton(T.t("Library"), BrowserActivity.class), navLp());
+        r1.addView(navButton(T.t("Stats"), StatsActivity.class), navLp());
+        r1.addView(navButton(T.t("Apps"), AppsActivity.class), navLp());
+        r2.addView(navButton(T.t("Wi-Fi"), TransferActivity.class), navLp());
+        r2.addView(navButton(T.t("Online"), OpdsActivity.class), navLp());
+        r2.addView(navButton(T.t("Settings"), SettingsActivity.class), navLp());
+        nav.addView(r1, new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP));
+        LinearLayout.LayoutParams l2 = new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP);
+        l2.topMargin = 6;
+        nav.addView(r2, l2);
         root.addView(nav, new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP));
         setContentView(root);
     }
@@ -62,7 +94,7 @@ public class HomeActivity extends Activity {
 
     private TextView navButton(String s, final Class<?> cls) {
         TextView t = Ui.button(this, s);
-        t.setTextSize(TypedValue.COMPLEX_UNIT_PX, 15);
+        t.setTextSize(TypedValue.COMPLEX_UNIT_PX, 18);
         t.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { startActivity(new Intent(HomeActivity.this, cls)); }
         });
@@ -72,6 +104,7 @@ public class HomeActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (dead) return;
         build();
         refresh();
         WhatsNew.maybeShow(this);
@@ -95,7 +128,12 @@ public class HomeActivity extends Activity {
         int goal = Stats.goalMinutes();
         String today = T.t("Today") + "  " + Stats.fmt(d[0]);
         if (goal > 0) today += (d[0] >= goal * 60L ? "  - " + T.t("goal reached") : "  /  " + goal + " " + T.t("min"));
-        hd.addView(Ui.text(this, today, 18, false));
+        LinearLayout right = new LinearLayout(this);
+        right.setOrientation(LinearLayout.VERTICAL);
+        right.setGravity(Gravity.RIGHT);
+        right.addView(Ui.text(this, LauncherHelper.clock(this) + "  \u00B7  " + LauncherHelper.battery(this) + "%", 20, true));
+        right.addView(Ui.text(this, today, 15, false));
+        hd.addView(right);
         col.addView(hd);
         col.addView(Ui.rule(this, 3));
 

@@ -17,7 +17,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class SettingsActivity extends Activity {
-    private static final String[] EXTRA = {"Dictionaries", "Saved words", "Back up data", "Restore data",
+    private static final String[] EXTRA = {"Home screen (launcher)", "Dictionaries", "Saved words", "Back up data", "Restore data",
             "Show error log", "Key test (button codes)", "About"};
 
     private Cfg.Opt[] opts;
@@ -54,18 +54,35 @@ public class SettingsActivity extends Activity {
     }
 
     private void action(String key) {
-        if (key.equals("Dictionaries")) startActivity(new Intent(this, DictsActivity.class));
+        if (key.equals("Home screen (launcher)")) homeScreen();
+        else if (key.equals("Dictionaries")) startActivity(new Intent(this, DictsActivity.class));
         else if (key.equals("Saved words")) startActivity(new Intent(this, WordsActivity.class));
         else if (key.equals("Back up data")) backup();
         else if (key.equals("Restore data")) restoreMenu();
         else if (key.equals("Show error log")) showLog();
         else if (key.equals("Key test (button codes)")) startActivity(new Intent(this, KeyTestActivity.class));
         else {
-            Dlg.message(this, "NookPoint 0.9",
+            Dlg.message(this, "NookPoint 0.10",
                     T.f("Reader for Nook Simple Touch (EPUB, FB2, TXT), inspired by CrossPoint Reader.\n\nBooks: {0}\nFonts: {1}\nDictionaries: {2}\nNotes and backups: {3}\n\nBundled fonts: Lora, IBM Plex Serif (SIL OFL), DejaVu (free license). Hyphenation patterns: TeX hyph-utf8 project (see assets/hyph).",
                             Prefs.booksDir().getAbsolutePath(), Prefs.fontsDir().getAbsolutePath(),
                             Prefs.dictDir().getAbsolutePath(), Diag.dir().getAbsolutePath()), "OK", null, null, null);
         }
+    }
+
+    private void homeScreen() {
+        final boolean def = LauncherHelper.isDefaultHome(this);
+        String text = T.t(def ? "NookPoint is the home screen now." : "NookPoint is not the home screen yet.") + "\n\n" + T.t(T.HOME_HELP);
+        Dlg.message(this, T.t("Home screen (launcher)"), text, T.t("Close"), null,
+                T.t(def ? "Stop being the home screen" : "Set as home screen"), new Runnable() {
+                    public void run() {
+                        if (def) {
+                            LauncherHelper.stopBeingHome(SettingsActivity.this);
+                            Toast.makeText(SettingsActivity.this, T.t("Done. Press Home to choose another launcher."), Toast.LENGTH_LONG).show();
+                        } else {
+                            LauncherHelper.chooseHome(SettingsActivity.this);
+                        }
+                    }
+                });
     }
 
     private void backup() {

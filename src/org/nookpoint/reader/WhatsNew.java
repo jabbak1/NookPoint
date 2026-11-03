@@ -11,6 +11,6 @@ class WhatsNew {
         Prefs.put("seen_version", v);
         if (v.equals(seen)) return;
         if (seen == null && Prefs.all().size() < 4) return;          // fresh install: nothing to explain yet
-        Dlg.message(a, T.f("What's new in {0}", v), T.t("WHATS_NEW_BODY"), T.t("Close"), null, null, null);
+        Dlg.message(a, T.f("What's new in {0}", v), T.t(T.WHATS_NEW), T.t("Close"), null, null, null);
     }
 }

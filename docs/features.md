@@ -9,6 +9,7 @@
 | **Dictionaries** / Словари | StarDict and dictd (even huge ones), long-press a word, saved-words list with export for flash cards |
 | **Fonts** / Шрифты | Lora, IBM Plex Serif, DejaVu Serif/Sans built in, your own `.ttf` in `fonts/` |
 | **Online** / Онлайн | OPDS catalogs (your Calibre server), Wi-Fi book transfer |
+| **Launcher** / Лаунчер | use NookPoint as the device home screen, Apps screen to start other apps, time and battery, crash safety net |
 | **Safe** / Надёжность | weekly automatic backups, restore, error log |
 | **Languages** / Языки | English, Русский, Français, Español |
 

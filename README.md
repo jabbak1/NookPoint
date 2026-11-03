@@ -19,6 +19,7 @@ An e-book reader for the **Nook Simple Touch** (Android 2.1, E Ink) and other ol
 - **Dictionaries:** StarDict and dictd, huge ones included; long-press a word; saved-words list with export for flash cards.
 - **Fonts:** Lora, IBM Plex Serif, DejaVu Serif and Sans built in (Cyrillic and accents), or your own `.ttf` in `fonts/`.
 - **Online:** OPDS catalogs (for example your Calibre server), book transfer over Wi-Fi.
+- **Launcher:** use it as the home screen of your Nook, with an Apps screen to start other programs.
 - **Safe:** weekly automatic backups, restore, an error log you can send for support.
 - **Languages:** English, Русский, Français, Español.
 
@@ -45,6 +46,16 @@ Updating: install the new APK over the old one. Back up first in *Settings → B
 
 **Online catalogs:** *Online → Add catalog*, for example `http://192.168.1.10:8080/opds` for a Calibre content server. Android 2.1 handles https poorly, so plain http on your home network works best.
 
+## Use it as the home screen (launcher)
+
+NookPoint can replace the stock home screen, so the Home ("n") button opens it and the **Apps** screen starts everything else.
+
+1. *Settings → Home screen (launcher) → Set as home screen*, then choose **NookPoint** and **Always** in the list Android shows.
+2. If the Nook's own home screen is already the default and no list appears, clear its default first (system *Settings → Applications → Manage applications →* the Nook home app *→ Clear defaults*) and press Home again.
+3. To go back: *Settings → Home screen (launcher) → Stop being the home screen*, press Home and pick the other launcher.
+
+Safety net: if NookPoint crashes three times within three minutes, it removes itself as the home screen automatically.
+
 ## Build it yourself
 
 No Android SDK needed on your computer: push the project to GitHub and the included workflow (`.github/workflows/build.yml`) builds the APK, signs it and publishes a release with notes.
@@ -53,6 +64,7 @@ For updates that always install over the previous version, keep one signing key:
 
 ## Known limitations
 
+- Using NookPoint as the home screen has not been tried on a real Nook yet; the safety net should let you back out, but do it with a backup at hand.
 - Tested on the logic level on a computer; behaviour on real devices may differ, so please report problems with the error log (*Settings → Show error log*).
 - Pictures inside a line of text are shown as separate blocks; SVG pictures are skipped.
 - Secure (https) online catalogs may not work on Android 2.1.

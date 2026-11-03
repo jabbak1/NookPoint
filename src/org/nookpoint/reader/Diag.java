@@ -36,6 +36,7 @@ class Diag {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             public void uncaughtException(Thread t, Throwable e) {
                 write("CRASH in thread " + t.getName(), e);
+                try { CrashGuard.note(); } catch (Throwable x) { }
                 if (old != null) old.uncaughtException(t, e);
             }
         });
