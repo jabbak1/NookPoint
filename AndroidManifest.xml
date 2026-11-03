@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.nookpoint.reader"
-    android:versionCode="9"
-    android:versionName="0.9">
+    android:versionCode="10"
+    android:versionName="0.10">
 
     <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="7" />
 
@@ -16,10 +16,18 @@
         android:icon="@drawable/icon"
         android:theme="@android:style/Theme.Light.NoTitleBar">
 
-        <activity android:name=".HomeActivity">
+        <activity android:name=".HomeActivity"
+            android:launchMode="singleTask"
+            android:stateNotNeeded="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- lets NookPoint be chosen as the device's home screen (launcher) -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
@@ -45,5 +53,6 @@
         <activity android:name=".WordsActivity" />
         <activity android:name=".OpdsActivity" />
         <activity android:name=".ShelvesActivity" />
+        <activity android:name=".AppsActivity" />
     </application>
 </manifest>

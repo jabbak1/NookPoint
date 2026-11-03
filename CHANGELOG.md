@@ -1,5 +1,17 @@
 # Changelog / История изменений
 
+## [0.10] - 2026-10-23
+### English
+- **Launcher.** NookPoint can now be the home screen of the device: the Home button opens it. A new **Apps** screen starts every installed app (plus shortcuts to Wi-Fi and system settings; apps can be hidden from the list). The main screen shows the time and battery. Set it up or switch back in *Settings → Home screen*.
+- **Safety net:** after three crashes within three minutes NookPoint removes itself as the home screen so that you can pick another launcher.
+- The main screen buttons are now two rows of three (Library, Stats, Apps / Wi-Fi, Online, Settings).
+- Fixed: the *What's new* window could show a placeholder instead of text when the interface language was English.
+### Русский
+- **Лаунчер.** NookPoint теперь можно сделать главным экраном устройства: кнопка Home открывает его. Новый экран **«Приложения»** запускает все установленные программы (плюс быстрые ссылки на настройки Wi-Fi и системные настройки; приложения можно скрывать из списка). На главном экране показаны время и заряд батареи. Настроить или вернуть обратно: *Настройки → Главный экран (лаунчер)*.
+- **Страховка:** после трёх сбоев за три минуты NookPoint сам перестаёт быть главным экраном, чтобы можно было выбрать другой лаунчер.
+- Кнопки главного экрана теперь в два ряда по три (Библиотека, Статистика, Приложения / Wi-Fi, Онлайн, Настройки).
+- Исправлено: окно «Что нового» при английском языке интерфейса могло показывать служебный текст вместо описания.
+
 ## [0.9] - 2026-10-21
 ### English
 - **Visual shelves.** Covers stand on wooden boards. New *Shelves* screen with tiles (a fan of covers, name, number of books) for your own shelves, automatic shelves (Reading / New / Finished) and every series. Tap a tile to open the bookcase; long-press your own shelf to rename or delete it.
