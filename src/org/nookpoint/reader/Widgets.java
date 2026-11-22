@@ -22,12 +22,11 @@ class Bar extends View {
     @Override
     protected void onDraw(Canvas c) {
         int w = getWidth(), h = getHeight();
-        p.setColor(Color.BLACK);
-        p.setStyle(Paint.Style.STROKE);
-        p.setStrokeWidth(2);
-        c.drawRect(1, 1, w - 1, h - 1, p);
-        p.setStyle(Paint.Style.FILL);
-        c.drawRect(3, 3, 3 + (w - 6) * frac, h - 3, p);
+        UiArt.roundRect(c, 0, 0, w, h, h / 2f, Color.WHITE, Color.BLACK, 2, p);
+        if (frac > 0f) {
+            float right = 3 + Math.max(h - 6, (w - 6) * frac);
+            UiArt.roundRect(c, 3, 3, Math.min(right, w - 3), h - 3, (h - 6) / 2f, Color.BLACK, 0, 0, p);
+        }
     }
 }
 

@@ -4,9 +4,11 @@ An e-book reader for the **Nook Simple Touch** (Android 2.1, E Ink) and other ol
 
 *[Читать по-русски](README.ru.md)*
 
-| Shelves screen | Bookcase view |
+| Home | Library |
 |---|---|
-| ![Shelves](docs/preview-shelves.png) | ![Bookcase](docs/preview-bookcase.png) |
+| ![](docs/preview-home.png) | ![](docs/preview-library.png) |
+| **Shelves** | **Bookcase** |
+| ![](docs/preview-shelves.png) | ![](docs/preview-bookcase.png) |
 
 *Design previews rendered by the app's own drawing code with sample covers.*
 

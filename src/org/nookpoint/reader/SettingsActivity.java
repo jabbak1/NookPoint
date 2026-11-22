@@ -62,7 +62,7 @@ public class SettingsActivity extends Activity {
         else if (key.equals("Show error log")) showLog();
         else if (key.equals("Key test (button codes)")) startActivity(new Intent(this, KeyTestActivity.class));
         else {
-            Dlg.message(this, "NookPoint 0.10",
+            Dlg.message(this, "NookPoint 0.11",
                     T.f("Reader for Nook Simple Touch (EPUB, FB2, TXT), inspired by CrossPoint Reader.\n\nBooks: {0}\nFonts: {1}\nDictionaries: {2}\nNotes and backups: {3}\n\nBundled fonts: Lora, IBM Plex Serif (SIL OFL), DejaVu (free license). Hyphenation patterns: TeX hyph-utf8 project (see assets/hyph).",
                             Prefs.booksDir().getAbsolutePath(), Prefs.fontsDir().getAbsolutePath(),
                             Prefs.dictDir().getAbsolutePath(), Diag.dir().getAbsolutePath()), "OK", null, null, null);

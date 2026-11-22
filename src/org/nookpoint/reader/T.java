@@ -84,7 +84,7 @@ class T {
         return n == 1 ? "book" : "books";
     }
 
-    static final String WHATS_NEW = "\u2022 Use NookPoint as the home screen of your Nook: the Home button opens it, and the Apps screen starts your other apps (Settings \u2192 Home screen)\n\u2022 Visual shelves: covers standing on boards, a Shelves screen, a bookcase view\n\u2022 FB2, pictures in books, search, highlights and notes, OPDS catalogs, better hyphenation, backups";
+    static final String WHATS_NEW = "\u2022 A new look: icons, rounded cards, a dock on the home screen, a hero card for your current book, and no system status bar\n\u2022 Use NookPoint as the home screen of your Nook: the Home button opens it, and the Apps screen starts your other apps (Settings \u2192 Home screen)\n\u2022 Visual shelves, FB2, pictures in books, search, highlights and notes, OPDS catalogs, better hyphenation, backups";
     static final String HOME_HELP = "With NookPoint as the home screen, the Home button always opens it, and the Apps screen starts your other apps.\n\nHow to set it up: tap Set as home screen, then choose NookPoint and Always in the list that appears. If your Nook's own home screen is already the default and no list appears, clear its default first (System settings \u2192 Applications \u2192 Manage applications \u2192 the Nook home app \u2192 Clear defaults) and press Home again.\n\nTo go back: tap Stop being the home screen here, press Home and choose the other launcher. If NookPoint crashes three times in a row it removes itself as the home screen automatically.";
 
     private static void build() {
@@ -147,6 +147,13 @@ class T {
          "Aucun signet.\nTouchez le coin supérieur droit d'une page pour en ajouter un.",
          "Aún no hay marcadores.\nToca la esquina superior derecha de una página para añadir uno."},
 
+        // ---- modern interface
+        {"Continue", "Продолжить", "Continuer", "Continuar"},
+        {"Add books over Wi-Fi", "Добавить книги по Wi-Fi", "Ajouter des livres par Wi-Fi", "Añadir libros por Wi-Fi"},
+        {"List", "Список", "Liste", "Lista"},
+        {"Grid", "Сетка", "Grille", "Cuadrícula"},
+        {"Shelf", "Полка", "Étagère", "Estante"},
+
         // ---- shelves, release
         {"Shelves", "Полки", "Étagères", "Estantes"},
         {"SHELVES", "ПОЛКИ", "ÉTAGÈRES", "ESTANTES"},
@@ -159,9 +166,9 @@ class T {
         {"Delete the shelf \"{0}\"? The books stay in the library.", "Удалить полку «{0}»? Книги останутся в библиотеке.", "Supprimer l'étagère « {0} » ? Les livres restent dans la bibliothèque.", "¿Eliminar la estante «{0}»? Los libros permanecen en la biblioteca."},
         {"What's new in {0}", "Что нового в {0}", "Nouveautés de la version {0}", "Novedades de la versión {0}"},
         {WHATS_NEW,
-         "\u2022 NookPoint можно сделать главным экраном Nook: кнопка Home открывает его, а экран «Приложения» запускает остальные программы (Настройки \u2192 Главный экран)\n\u2022 Наглядные полки: обложки на досках, экран «Полки», вид «Полка»\n\u2022 FB2, картинки в книгах, поиск, выделения и заметки, каталоги OPDS, точные переносы, резервные копии",
-         "\u2022 Utilisez NookPoint comme écran d'accueil de votre Nook : le bouton Accueil l'ouvre et l'écran Applications lance vos autres applications (Réglages \u2192 Écran d'accueil)\n\u2022 Étagères visuelles : couvertures sur des planches, écran Étagères, vue Étagère\n\u2022 FB2, images dans les livres, recherche, surlignages et notes, catalogues OPDS, césure précise, sauvegardes",
-         "\u2022 Usa NookPoint como pantalla principal de tu Nook: el botón Inicio lo abre y la pantalla Aplicaciones inicia tus otras aplicaciones (Ajustes \u2192 Pantalla principal)\n\u2022 Estantes visuales: portadas sobre tablas, pantalla Estantes, vista Estante\n\u2022 FB2, imágenes en los libros, búsqueda, subrayados y notas, catálogos OPDS, separación silábica precisa, copias de seguridad"},
+         "\u2022 Новый вид: иконки, скруглённые карточки, док-панель на главном экране, крупная карточка текущей книги и без системной строки состояния\n\u2022 NookPoint можно сделать главным экраном Nook: кнопка Home открывает его, а экран «Приложения» запускает остальные программы (Настройки \u2192 Главный экран)\n\u2022 Наглядные полки, FB2, картинки в книгах, поиск, выделения и заметки, каталоги OPDS, точные переносы, резервные копии",
+         "\u2022 Nouvelle apparence : icônes, cartes arrondies, barre de raccourcis sur l'écran d'accueil, grande carte du livre en cours et sans barre d'état système\n\u2022 Utilisez NookPoint comme écran d'accueil de votre Nook : le bouton Accueil l'ouvre et l'écran Applications lance vos autres applications (Réglages \u2192 Écran d'accueil)\n\u2022 Étagères visuelles, FB2, images dans les livres, recherche, surlignages et notes, catalogues OPDS, césure précise, sauvegardes",
+         "\u2022 Nuevo aspecto: iconos, tarjetas redondeadas, barra de accesos en la pantalla principal, tarjeta grande del libro actual y sin barra de estado del sistema\n\u2022 Usa NookPoint como pantalla principal de tu Nook: el botón Inicio lo abre y la pantalla Aplicaciones inicia tus otras aplicaciones (Ajustes \u2192 Pantalla principal)\n\u2022 Estantes visuales, FB2, imágenes en los libros, búsqueda, subrayados y notas, catálogos OPDS, separación silábica precisa, copias de seguridad"},
         {HOME_HELP,
          "Когда NookPoint — главный экран, кнопка Home всегда открывает его, а экран «Приложения» запускает остальные программы.\n\nКак настроить: нажмите «Сделать главным экраном», затем выберите NookPoint и «Всегда» в появившемся списке. Если стандартный главный экран Nook уже назначен по умолчанию и список не появляется, сначала сбросьте его настройки по умолчанию (Системные настройки \u2192 Приложения \u2192 Управление приложениями \u2192 домашнее приложение Nook \u2192 Очистить по умолчанию) и снова нажмите Home.\n\nКак вернуть всё обратно: нажмите здесь «Больше не главный экран», нажмите Home и выберите другой лаунчер. Если NookPoint трижды подряд вылетит, он сам перестанет быть главным экраном.",
          "Lorsque NookPoint est l'écran d'accueil, le bouton Accueil l'ouvre toujours et l'écran Applications lance vos autres applications.\n\nConfiguration : touchez Définir comme écran d'accueil, puis choisissez NookPoint et Toujours dans la liste. Si l'écran d'accueil d'origine de votre Nook est déjà celui par défaut et qu'aucune liste n'apparaît, effacez d'abord ses réglages par défaut (Réglages système \u2192 Applications \u2192 Gérer les applications \u2192 l'application d'accueil du Nook \u2192 Effacer les valeurs par défaut), puis appuyez de nouveau sur Accueil.\n\nPour revenir en arrière : touchez ici Ne plus être l'écran d'accueil, appuyez sur Accueil et choisissez l'autre lanceur. Si NookPoint plante trois fois de suite, il cesse automatiquement d'être l'écran d'accueil.",

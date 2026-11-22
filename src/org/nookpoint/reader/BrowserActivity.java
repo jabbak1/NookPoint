@@ -22,7 +22,8 @@ public class BrowserActivity extends Activity implements Library.Listener {
     private static final String[] FILTER_NAMES = {"All books", "Reading", "New", "Finished"};
 
     private ListView list;
-    private TextView status, clear, btnView;
+    private TextView status, clear;
+    private IconButton btnView;
     private ArrayList<LibItem> all = new ArrayList<LibItem>();
     private ArrayList<LibItem> shown = new ArrayList<LibItem>();
     private int sort, filter, gen;
@@ -62,13 +63,10 @@ public class BrowserActivity extends Activity implements Library.Listener {
     }
 
     // ------------------------------------------------------------------ screen
-    private TextView toolButton(String text, View.OnClickListener l) {
-        TextView t = Ui.button(this, text);
-        t.setTextSize(TypedValue.COMPLEX_UNIT_PX, 17);
-        t.setPadding(2, 16, 2, 16);
-        t.setSingleLine(true);
-        t.setOnClickListener(l);
-        return t;
+    private IconButton toolIcon(int kind, String label, View.OnClickListener l) {
+        IconButton b = new IconButton(this, kind, label);
+        b.setOnClickListener(l);
+        return b;
     }
 
     private LinearLayout.LayoutParams toolLp() {
@@ -77,30 +75,33 @@ public class BrowserActivity extends Activity implements Library.Listener {
         return lp;
     }
 
+    private int viewIcon() { return viewMode == 0 ? UiArt.VIEW_LIST : (viewMode == 1 ? UiArt.VIEW_GRID : UiArt.VIEW_SHELF); }
+
     private void build() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.WHITE);
-        root.addView(Ui.title(this, T.t("Library")));
-        root.addView(Ui.rule(this, 3));
+        LinearLayout header = Ui.header(this, T.t("Library"));
+        root.addView(header);
 
         LinearLayout bar = new LinearLayout(this);
         bar.setOrientation(LinearLayout.HORIZONTAL);
-        bar.setPadding(5, 8, 5, 4);
-        bar.addView(toolButton(T.t("Search"), new View.OnClickListener() {
+        bar.setPadding(8, 2, 8, 6);
+        bar.addView(toolIcon(UiArt.SEARCH, T.t("Search"), new View.OnClickListener() {
             public void onClick(View v) { askSearch(); }
         }), toolLp());
-        bar.addView(toolButton(T.t("Sort"), new View.OnClickListener() {
+        bar.addView(toolIcon(UiArt.SORT, T.t("Sort"), new View.OnClickListener() {
             public void onClick(View v) { sortMenu(); }
         }), toolLp());
-        bar.addView(toolButton(T.t("Filter"), new View.OnClickListener() {
+        bar.addView(toolIcon(UiArt.FILTER, T.t("Filter"), new View.OnClickListener() {
             public void onClick(View v) { filterMenu(); }
         }), toolLp());
-        btnView = toolButton(viewLabel(), new View.OnClickListener() {
+        btnView = toolIcon(viewIcon(), viewName(), new View.OnClickListener() {
             public void onClick(View v) {
                 viewMode = (viewMode + 1) % 3;
                 Prefs.put("lib_view", viewMode == 2 ? "shelf" : (viewMode == 1 ? "grid" : "list"));
-                btnView.setText(viewLabel());
+                btnView.setKind(viewIcon());
+                btnView.setLabel(viewName());
                 apply(false);
             }
         });
@@ -131,9 +132,8 @@ public class BrowserActivity extends Activity implements Library.Listener {
         setContentView(root);
     }
 
-    private String viewLabel() {
-        // the button names the view you get when you tap it
-        return viewMode == 0 ? T.t("\u25A6 Grid") : (viewMode == 1 ? T.t("\u25A4 Shelf") : T.t("\u2630 List"));
+    private String viewName() {
+        return T.t(viewMode == 0 ? "List" : (viewMode == 1 ? "Grid" : "Shelf"));
     }
 
     private void reload() {

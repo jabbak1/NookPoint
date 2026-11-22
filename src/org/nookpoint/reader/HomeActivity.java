@@ -18,8 +18,10 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 
+/** The home screen (and launcher): current book, recent books on a shelf, your shelves, and a dock. */
 public class HomeActivity extends Activity {
     private LinearLayout col;
+    private boolean dead;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -37,8 +39,6 @@ public class HomeActivity extends Activity {
         Backup.auto();
     }
 
-    private boolean dead;
-
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -52,55 +52,6 @@ public class HomeActivity extends Activity {
         super.onBackPressed();
     }
 
-    private void build() {
-
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.WHITE);
-
-        ScrollView sv = new ScrollView(this);
-        sv.setBackgroundColor(Color.WHITE);
-        col = new LinearLayout(this);
-        col.setOrientation(LinearLayout.VERTICAL);
-        sv.addView(col, new ViewGroup.LayoutParams(Ui.FILL, Ui.WRAP));
-        root.addView(sv, new LinearLayout.LayoutParams(Ui.FILL, 0, 1f));
-
-        root.addView(Ui.rule(this, 2));
-        LinearLayout nav = new LinearLayout(this);
-        nav.setOrientation(LinearLayout.VERTICAL);
-        nav.setPadding(6, 8, 6, 8);
-        LinearLayout r1 = new LinearLayout(this), r2 = new LinearLayout(this);
-        r1.setOrientation(LinearLayout.HORIZONTAL);
-        r2.setOrientation(LinearLayout.HORIZONTAL);
-        r1.addView(navButton(T.t("Library"), BrowserActivity.class), navLp());
-        r1.addView(navButton(T.t("Stats"), StatsActivity.class), navLp());
-        r1.addView(navButton(T.t("Apps"), AppsActivity.class), navLp());
-        r2.addView(navButton(T.t("Wi-Fi"), TransferActivity.class), navLp());
-        r2.addView(navButton(T.t("Online"), OpdsActivity.class), navLp());
-        r2.addView(navButton(T.t("Settings"), SettingsActivity.class), navLp());
-        nav.addView(r1, new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP));
-        LinearLayout.LayoutParams l2 = new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP);
-        l2.topMargin = 6;
-        nav.addView(r2, l2);
-        root.addView(nav, new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP));
-        setContentView(root);
-    }
-
-    private LinearLayout.LayoutParams navLp() {
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, Ui.WRAP, 1f);
-        lp.setMargins(2, 0, 2, 0);
-        return lp;
-    }
-
-    private TextView navButton(String s, final Class<?> cls) {
-        TextView t = Ui.button(this, s);
-        t.setTextSize(TypedValue.COMPLEX_UNIT_PX, 18);
-        t.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) { startActivity(new Intent(HomeActivity.this, cls)); }
-        });
-        return t;
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -110,41 +61,77 @@ public class HomeActivity extends Activity {
         WhatsNew.maybeShow(this);
     }
 
+    // ------------------------------------------------------------------ frame: scrolling content + dock
+    private void build() {
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(Color.WHITE);
+        ScrollView sv = new ScrollView(this);
+        sv.setBackgroundColor(Color.WHITE);
+        col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        sv.addView(col, new ViewGroup.LayoutParams(Ui.FILL, Ui.WRAP));
+        root.addView(sv, new LinearLayout.LayoutParams(Ui.FILL, 0, 1f));
+        root.addView(Ui.rule(this, 1));
+        root.addView(dock());
+        setContentView(root);
+    }
+
+    private View dockItem(int kind, String label, final Class<?> cls) {
+        IconButton b = new IconButton(this, kind, label);
+        b.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { startActivity(new Intent(HomeActivity.this, cls)); }
+        });
+        return b;
+    }
+
+    private View dock() {
+        LinearLayout d = new LinearLayout(this);
+        d.setOrientation(LinearLayout.HORIZONTAL);
+        d.setBackgroundColor(Color.WHITE);
+        d.setPadding(4, 6, 4, 6);
+        Object[][] items = {
+                {UiArt.LIBRARY, T.t("Library"), BrowserActivity.class},
+                {UiArt.APPS, T.t("Apps"), AppsActivity.class},
+                {UiArt.WIFI, T.t("Wi-Fi"), TransferActivity.class},
+                {UiArt.ONLINE, T.t("Online"), OpdsActivity.class},
+                {UiArt.STATS, T.t("Stats"), StatsActivity.class},
+                {UiArt.SETTINGS, T.t("Settings"), SettingsActivity.class}};
+        for (int i = 0; i < items.length; i++) {
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, Ui.WRAP, 1f);
+            lp.setMargins(2, 0, 2, 0);
+            d.addView(dockItem(((Integer) items[i][0]).intValue(), (String) items[i][1], (Class<?>) items[i][2]), lp);
+        }
+        return d;
+    }
+
     private void open(String path) {
         Intent i = new Intent(this, ReaderActivity.class);
         i.putExtra("path", path);
         startActivity(i);
     }
 
+    // ------------------------------------------------------------------ content
     private void refresh() {
         col.removeAllViews();
 
         LinearLayout hd = new LinearLayout(this);
         hd.setOrientation(LinearLayout.HORIZONTAL);
         hd.setGravity(Gravity.CENTER_VERTICAL);
-        hd.setPadding(16, 14, 16, 12);
-        hd.addView(Ui.text(this, "NookPoint", 32, true), new LinearLayout.LayoutParams(0, Ui.WRAP, 1f));
-        long[] d = Stats.day(Stats.today());
+        hd.setPadding(20, 24, 20, 6);
+        hd.addView(Ui.text(this, "NookPoint", 34, true), new LinearLayout.LayoutParams(0, Ui.WRAP, 1f));
         int goal = Stats.goalMinutes();
-        String today = T.t("Today") + "  " + Stats.fmt(d[0]);
-        if (goal > 0) today += (d[0] >= goal * 60L ? "  - " + T.t("goal reached") : "  /  " + goal + " " + T.t("min"));
-        LinearLayout right = new LinearLayout(this);
-        right.setOrientation(LinearLayout.VERTICAL);
-        right.setGravity(Gravity.RIGHT);
-        right.addView(Ui.text(this, LauncherHelper.clock(this) + "  \u00B7  " + LauncherHelper.battery(this) + "%", 20, true));
-        right.addView(Ui.text(this, today, 15, false));
-        hd.addView(right);
+        long[] today = Stats.day(Stats.today());
+        if (goal > 0) {
+            hd.addView(Ui.chip(this, (today[0] >= goal * 60L ? "\u2713 " : "") + Stats.fmt(today[0]) + " / " + goal + " " + T.t("min")));
+        } else if (today[0] > 0) {
+            hd.addView(Ui.chip(this, Stats.fmt(today[0])));
+        }
         col.addView(hd);
-        col.addView(Ui.rule(this, 3));
 
         String last = Prefs.get("last", null);
         if (last != null && !new File(last).exists()) last = null;
-        if (last != null) col.addView(card(last));
-        else {
-            TextView t = Ui.text(this, T.t("Welcome!\n\nNo books yet.\nOpen Wi-Fi to upload books from your phone or computer, or Library to browse the card."), 22, false);
-            t.setPadding(20, 40, 20, 40);
-            col.addView(t);
-        }
+        col.addView(last != null ? hero(last) : welcome());
 
         ArrayList<LibItem> rec = new ArrayList<LibItem>();
         ArrayList<String> all = Prefs.recents();
@@ -159,7 +146,6 @@ public class HomeActivity extends Activity {
             }
         }
         if (rec.size() > 0) {
-            col.addView(Ui.rule(this, 1));
             col.addView(Ui.section(this, T.t("RECENT")));
             ShelfRowView row = new ShelfRowView(this);
             row.bind(rec, 0, 3, new Library.Listener() {
@@ -169,6 +155,129 @@ public class HomeActivity extends Activity {
             col.addView(row, new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP));
         }
         shelvesSection();
+    }
+
+    private LinearLayout.LayoutParams cardLp() {
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP);
+        lp.setMargins(14, 12, 14, 8);
+        return lp;
+    }
+
+    private View welcome() {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(24, 24, 24, 24);
+        card.setBackgroundDrawable(Ui.box(Color.WHITE, 2, 28));
+        card.addView(Ui.text(this, T.t("Welcome!\n\nNo books yet.\nOpen Wi-Fi to upload books from your phone or computer, or Library to browse the card."), 20, false));
+        TextView add = Ui.primary(this, T.t("Add books over Wi-Fi"));
+        add.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { startActivity(new Intent(HomeActivity.this, TransferActivity.class)); }
+        });
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP);
+        lp.topMargin = 18;
+        card.addView(add, lp);
+        TextView lib = Ui.button(this, T.t("Library"));
+        lib.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { startActivity(new Intent(HomeActivity.this, BrowserActivity.class)); }
+        });
+        LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP);
+        lp2.topMargin = 10;
+        card.addView(lib, lp2);
+        LinearLayout wrap = new LinearLayout(this);
+        wrap.addView(card, new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP));
+        wrap.setPadding(14, 12, 14, 8);
+        return wrap;
+    }
+
+    /** The book you are reading: cover, title, progress, and a big Continue button. */
+    private View hero(final String path) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.HORIZONTAL);
+        card.setPadding(18, 18, 18, 18);
+        card.setBackgroundDrawable(Ui.box(Color.WHITE, 2, 28));
+        card.setClickable(true);
+        card.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { open(path); }
+        });
+
+        final ImageView iv = new ImageView(this);
+        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        iv.setTag(path);
+        card.addView(iv, new LinearLayout.LayoutParams(150, 210));
+
+        LinearLayout info = new LinearLayout(this);
+        info.setOrientation(LinearLayout.VERTICAL);
+        info.setPadding(18, 0, 0, 0);
+        info.addView(Ui.muted(this, T.t("CONTINUE READING"), 13));
+        final TextView title = Ui.text(this, Prefs.title(path), 26, true);
+        title.setMaxLines(3);
+        title.setEllipsize(TextUtils.TruncateAt.END);
+        title.setPadding(0, 6, 0, 2);
+        info.addView(title);
+        final TextView author = Ui.muted(this, Prefs.author(path), 18);
+        author.setMaxLines(2);
+        info.addView(author);
+
+        int pc = Prefs.pct(path);
+        Bar bar = new Bar(this);
+        bar.set(Stats.isFinished(path) ? 1f : pc / 100f);
+        LinearLayout.LayoutParams bl = new LinearLayout.LayoutParams(Ui.FILL, 12);
+        bl.topMargin = 16;
+        info.addView(bar, bl);
+        TextView st = Ui.muted(this, (Stats.isFinished(path) ? T.t("Finished") : pc + "%") + "   \u00B7   "
+                + T.f("{0} read", Stats.fmt(Stats.bookSecs(path))), 16);
+        st.setPadding(0, 8, 0, 0);
+        info.addView(st);
+
+        String d = Prefs.get("meta2:" + path, null) == null ? null : Prefs.get("desc:" + path, "");
+        if (d == null) {                                   // read the annotation once, then redraw
+            Library.fetchMeta(path, new Runnable() {
+                public void run() { if (!isFinishing()) refresh(); }
+            });
+        } else if (d.length() > 0) {
+            TextView ann = Ui.muted(this, d.replace('\n', ' '), 16);
+            ann.setMaxLines(3);
+            ann.setEllipsize(TextUtils.TruncateAt.END);
+            ann.setPadding(0, 10, 0, 0);
+            info.addView(ann);
+        }
+
+        LinearLayout buttons = new LinearLayout(this);
+        buttons.setOrientation(LinearLayout.HORIZONTAL);
+        buttons.setGravity(Gravity.CENTER_VERTICAL);
+        TextView go = Ui.primary(this, T.t("Continue"));
+        go.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { open(path); }
+        });
+        buttons.addView(go, new LinearLayout.LayoutParams(Ui.WRAP, Ui.WRAP));
+        TextView more = Ui.button(this, T.t("Book info"));
+        more.setTextSize(TypedValue.COMPLEX_UNIT_PX, 16);
+        more.setPadding(18, 12, 18, 12);
+        more.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { BookInfo.show(HomeActivity.this, path); }
+        });
+        LinearLayout.LayoutParams ml = new LinearLayout.LayoutParams(Ui.WRAP, Ui.WRAP);
+        ml.leftMargin = 10;
+        buttons.addView(more, ml);
+        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(Ui.WRAP, Ui.WRAP);
+        bp.topMargin = 16;
+        info.addView(buttons, bp);
+        card.addView(info, new LinearLayout.LayoutParams(0, Ui.WRAP, 1f));
+
+        iv.setImageBitmap(CoverCache.peek(path));
+        CoverCache.load(this, path, new CoverCache.Callback() {
+            public void onCover(String p, Bitmap bm) {
+                if (p.equals(iv.getTag())) {
+                    iv.setImageBitmap(bm);
+                    title.setText(Prefs.title(p));
+                    author.setText(Prefs.author(p));
+                }
+            }
+        });
+        LinearLayout wrap = new LinearLayout(this);
+        wrap.setPadding(14, 12, 14, 8);
+        wrap.addView(card, new LinearLayout.LayoutParams(Ui.FILL, Ui.WRAP));
+        return wrap;
     }
 
     private void openShelf(String collection, int filter) {
@@ -181,13 +290,12 @@ public class HomeActivity extends Activity {
 
     /** Your shelves as tiles (or a "new shelf" tile), plus a link to all shelves. */
     private void shelvesSection() {
-        col.addView(Ui.rule(this, 1));
         LinearLayout head = new LinearLayout(this);
         head.setOrientation(LinearLayout.HORIZONTAL);
         head.setGravity(Gravity.CENTER_VERTICAL);
         head.addView(Ui.section(this, T.t("SHELVES")), new LinearLayout.LayoutParams(0, Ui.WRAP, 1f));
         TextView all = Ui.text(this, T.t("All shelves") + " \u203A", 17, true);
-        all.setPadding(12, 12, 16, 4);
+        all.setPadding(12, 16, 20, 4);
         all.setClickable(true);
         all.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { startActivity(new Intent(HomeActivity.this, ShelvesActivity.class)); }
@@ -196,7 +304,7 @@ public class HomeActivity extends Activity {
         col.addView(head);
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(8, 0, 8, 14);
+        row.setPadding(8, 0, 8, 18);
         ArrayList<String> names = Shelves.names();
         int shown = 0;
         for (int i = 0; i < names.size() && shown < 3; i++, shown++) {
@@ -224,79 +332,5 @@ public class HomeActivity extends Activity {
         }
         for (; shown < 3; shown++) row.addView(new View(this), new LinearLayout.LayoutParams(0, 230, 1f));
         col.addView(row);
-    }
-
-    private View card(final String path) {
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.HORIZONTAL);
-        card.setPadding(16, 16, 16, 16);
-        card.setClickable(true);
-        card.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) { open(path); }
-        });
-
-        final ImageView iv = new ImageView(this);
-        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        iv.setTag(path);
-        card.addView(iv, new LinearLayout.LayoutParams(168, 236));
-
-        LinearLayout info = new LinearLayout(this);
-        info.setOrientation(LinearLayout.VERTICAL);
-        info.setPadding(18, 0, 0, 0);
-        info.addView(Ui.text(this, T.t("CONTINUE READING"), 15, true));
-        final TextView title = Ui.text(this, Prefs.title(path), 28, true);
-        title.setMaxLines(3);
-        title.setEllipsize(TextUtils.TruncateAt.END);
-        title.setPadding(0, 8, 0, 4);
-        info.addView(title);
-        final TextView author = Ui.text(this, Prefs.author(path), 20, false);
-        author.setMaxLines(2);
-        info.addView(author);
-
-        int pc = Prefs.pct(path);
-        Bar bar = new Bar(this);
-        bar.set(pc / 100f);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(Ui.FILL, 16);
-        lp.topMargin = 18;
-        info.addView(bar, lp);
-        TextView st = Ui.text(this, (Stats.isFinished(path) ? T.t("Finished") : pc + "%") + "   \u00B7   "
-                + T.f("{0} read", Stats.fmt(Stats.bookSecs(path))), 18, false);
-        st.setPadding(0, 8, 0, 0);
-        info.addView(st);
-
-        String d = Prefs.get("meta2:" + path, null) == null ? null : Prefs.get("desc:" + path, "");
-        if (d == null) {                                   // read the annotation once, then redraw
-            Library.fetchMeta(path, new Runnable() {
-                public void run() { if (!isFinishing()) refresh(); }
-            });
-        } else if (d.length() > 0) {
-            TextView ann = Ui.text(this, d.replace('\n', ' '), 17, false);
-            ann.setMaxLines(4);
-            ann.setEllipsize(TextUtils.TruncateAt.END);
-            ann.setPadding(0, 12, 0, 0);
-            info.addView(ann);
-        }
-        TextView infoBtn = Ui.button(this, T.t("Book info"));
-        infoBtn.setTextSize(TypedValue.COMPLEX_UNIT_PX, 16);
-        infoBtn.setPadding(14, 8, 14, 8);
-        infoBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) { BookInfo.show(HomeActivity.this, path); }
-        });
-        LinearLayout.LayoutParams ip = new LinearLayout.LayoutParams(Ui.WRAP, Ui.WRAP);
-        ip.topMargin = 12;
-        info.addView(infoBtn, ip);
-        card.addView(info, new LinearLayout.LayoutParams(0, Ui.WRAP, 1f));
-
-        iv.setImageBitmap(CoverCache.peek(path));
-        CoverCache.load(this, path, new CoverCache.Callback() {
-            public void onCover(String p, Bitmap bm) {
-                if (p.equals(iv.getTag())) {
-                    iv.setImageBitmap(bm);
-                    title.setText(Prefs.title(p));
-                    author.setText(Prefs.author(p));
-                }
-            }
-        });
-        return card;
     }
 }

@@ -4,9 +4,11 @@
 
 *[Read in English](README.md)*
 
-| Экран «Полки» | Вид «Полка» |
+| Главный экран | Библиотека |
 |---|---|
-| ![Полки](docs/preview-shelves.png) | ![Книжный шкаф](docs/preview-bookcase.png) |
+| ![](docs/preview-home.png) | ![](docs/preview-library.png) |
+| **Полки** | **Вид «Полка»** |
+| ![](docs/preview-shelves.png) | ![](docs/preview-bookcase.png) |
 
 *Макеты, нарисованные кодом самого приложения на примерах обложек.*
 

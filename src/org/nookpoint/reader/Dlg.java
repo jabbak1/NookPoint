@@ -28,7 +28,7 @@ class Dlg {
         d.requestWindowFeature(Window.FEATURE_NO_TITLE);
         LinearLayout box = new LinearLayout(c);
         box.setOrientation(LinearLayout.VERTICAL);
-        box.setBackgroundDrawable(Ui.box(Color.WHITE, 3));
+        box.setBackgroundDrawable(Ui.box(Color.WHITE, 3, 26));
         if (title != null) {
             TextView t = Ui.text(c, title, 26, true);
             t.setPadding(18, 14, 18, 12);

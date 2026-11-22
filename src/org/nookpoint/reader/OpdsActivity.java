@@ -40,9 +40,9 @@ public class OpdsActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.WHITE);
-        title = Ui.title(this, T.t("Online catalogs"));
-        root.addView(title);
-        root.addView(Ui.rule(this, 3));
+        LinearLayout header = Ui.header(this, T.t("Online catalogs"));
+        title = Ui.headerTitle(header);
+        root.addView(header);
         toolbar = new LinearLayout(this);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
         toolbar.setPadding(5, 8, 5, 6);

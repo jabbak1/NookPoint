@@ -48,8 +48,7 @@ public class AppsActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.WHITE);
-        root.addView(Ui.title(this, T.t("Apps")));
-        root.addView(Ui.rule(this, 3));
+        root.addView(Ui.header(this, T.t("Apps")));
         toggle = Ui.button(this, "");
         toggle.setTextSize(TypedValue.COMPLEX_UNIT_PX, 17);
         toggle.setOnClickListener(new View.OnClickListener() {
