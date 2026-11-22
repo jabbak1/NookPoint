@@ -1,5 +1,17 @@
 # Changelog / История изменений
 
+## [0.11] - 2026-11-18
+### English
+- **A modern look made for E Ink:** flat design, rounded cards, pill buttons that turn black when pressed, line icons, a back chevron in every page header, thin separators and slim rounded progress bars.
+- **New home screen:** a card for the book you are reading (cover, progress, annotation and a *Continue* button), recent books on a shelf, your shelves, and a dock with icons (Library, Apps, Wi-Fi, Online, Stats, Settings). No clock or battery on it.
+- **Library toolbar** with icons (Search, Sort, Filter and the current view).
+- **Fullscreen everywhere:** the system status bar (clock, battery, Wi-Fi icons) is hidden. The reader's own status line can still show a battery indicator (*Settings → Battery indicator*).
+### Русский
+- **Современный вид, сделанный под E Ink:** плоский дизайн, скруглённые карточки, кнопки-«таблетки», которые чернеют при нажатии, линейные иконки, кнопка «назад» в заголовке каждого экрана, тонкие разделители и узкие скруглённые индикаторы прогресса.
+- **Новый главный экран:** карточка книги, которую вы читаете (обложка, прогресс, аннотация и кнопка «Продолжить»), последние книги на полке, ваши полки и нижняя док-панель с иконками (Библиотека, Приложения, Wi-Fi, Онлайн, Статистика, Настройки). Без часов и батареи.
+- **Панель библиотеки** с иконками (Поиск, Сортировка, Фильтр и текущий вид).
+- **Полный экран везде:** системная строка состояния (часы, батарея, значки Wi-Fi) скрыта. Собственная строка состояния читалки по-прежнему может показывать батарею (*Настройки → Индикатор батареи*).
+
 ## [0.10] - 2026-10-23
 ### English
 - **Launcher.** NookPoint can now be the home screen of the device: the Home button opens it. A new **Apps** screen starts every installed app (plus shortcuts to Wi-Fi and system settings; apps can be hidden from the list). The main screen shows the time and battery. Set it up or switch back in *Settings → Home screen*.
